@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("AGENT") // "ADMIN" or "AGENT"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedTickets Ticket[] @relation("AssignedAgent")
+}
+
+model Ticket {
+  id            String   @id @default(uuid())
+  ticketNumber  String   @unique
+  subject       String
+  description   String
+  customerName  String
+  customerEmail String
+  status        String   @default("OPEN") // "OPEN", "RESOLVED", "CLOSED"
+  category      String   @default("GENERAL_QUESTION") // "GENERAL_QUESTION", "TECHNICAL_QUESTION", "REFUND_REQUEST"
+  priority      String   @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
+  aiSummary     String?
+  suggestedReply String?
+
+  assignedAgentId String?
+  assignedAgent   User?   @relation("AssignedAgent", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+
+  messages  TicketMessage[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model TicketMessage {
+  id            String   @id @default(uuid())
+  ticketId      String
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderType    String   // "CUSTOMER", "AGENT", "SYSTEM"
+  senderName    String
+  content       String
+  isAiGenerated Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model KnowledgeBase {
+  id        String   @id @default(uuid())
+  title     String
+  category  String
+  content   String
+  keywords  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

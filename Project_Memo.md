@@ -8,7 +8,7 @@ AI-powered ticket management platform for student and customer support. Automati
 ## 2. Tech Stack
 - **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, React Router v6
 - **Backend:** Node.js, Express, TypeScript, `tsx`
-- **Database & ORM:** PostgreSQL (`helpdesk`), Prisma ORM
+- **Database & ORM:** PostgreSQL (`helpdesk`), Prisma ORM v7 (`prisma.config.ts` + `@prisma/adapter-pg`)
 - **Auth:** JWT + bcryptjs (Role-based: `ADMIN`, `AGENT`)
 - **AI Service:** Rule & keyword classification, KB-grounded suggested replies
 

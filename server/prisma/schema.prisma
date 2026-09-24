@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,25 +11,29 @@ model User {
   id           String   @id @default(uuid())
   name         String
   email        String   @unique
-  passwordHash String
+  passwordHash String?
   role         String   @default("AGENT") // "ADMIN" or "AGENT"
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  assignedTickets Ticket[] @relation("AssignedAgent")
+  assignedTickets Ticket[]  @relation("AssignedAgent")
+  emailVerified   Boolean   @default(false)
+  image           String?
+  sessions        Session[]
+  accounts        Account[]
 }
 
 model Ticket {
-  id            String   @id @default(uuid())
-  ticketNumber  String   @unique
-  subject       String
-  description   String
-  customerName  String
-  customerEmail String
-  status        String   @default("OPEN") // "OPEN", "RESOLVED", "CLOSED"
-  category      String   @default("GENERAL_QUESTION") // "GENERAL_QUESTION", "TECHNICAL_QUESTION", "REFUND_REQUEST"
-  priority      String   @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
-  aiSummary     String?
+  id             String  @id @default(uuid())
+  ticketNumber   String  @unique
+  subject        String
+  description    String
+  customerName   String
+  customerEmail  String
+  status         String  @default("OPEN") // "OPEN", "RESOLVED", "CLOSED"
+  category       String  @default("GENERAL_QUESTION") // "GENERAL_QUESTION", "TECHNICAL_QUESTION", "REFUND_REQUEST"
+  priority       String  @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
+  aiSummary      String?
   suggestedReply String?
 
   assignedAgentId String?
@@ -43,7 +48,7 @@ model TicketMessage {
   id            String   @id @default(uuid())
   ticketId      String
   ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  senderType    String   // "CUSTOMER", "AGENT", "SYSTEM"
+  senderType    String // "CUSTOMER", "AGENT", "SYSTEM"
   senderName    String
   content       String
   isAiGenerated Boolean  @default(false)
@@ -58,4 +63,52 @@ model KnowledgeBase {
   keywords  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

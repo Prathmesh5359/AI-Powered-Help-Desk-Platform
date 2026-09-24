@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from './config.js';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './auth.js';
 import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
 import ticketsRouter from './routes/tickets.js';
@@ -10,7 +12,10 @@ import statsRouter from './routes/stats.js';
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+}));
 app.use(express.json());
 
 // Request logger middleware
@@ -19,7 +24,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Routes
+// Better Auth endpoint handler
+app.all('/api/auth/*', toNodeHandler(auth));
+
+// Legacy API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/tickets', ticketsRouter);

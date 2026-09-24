@@ -41,3 +41,6 @@ yarn-error.log*
 .idea/
 *.swp
 *.swo
+
+# Project Memo
+Project_Memo.md
